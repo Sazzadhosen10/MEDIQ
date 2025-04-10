@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1061388735213",
+    "project_id": "mediq-60b44",
+    "storage_bucket": "mediq-60b44.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1061388735213:android:07a1fcbf4b447657c432e4",
+        "android_client_info": {
+          "package_name": "com.example.mediq"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqXGCzhWoBgiDdOOp0bR-rgkMFqg3nijs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
