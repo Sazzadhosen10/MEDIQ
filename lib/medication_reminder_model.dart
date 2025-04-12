@@ -6,6 +6,7 @@ class MedicationReminder {
   final int hour;
   final int minute;
   final bool isActive;
+  final DateTime createdTime;
 
   MedicationReminder({
     required this.id,
@@ -15,6 +16,7 @@ class MedicationReminder {
     required this.hour,
     required this.minute,
     required this.isActive,
+    required this.createdTime,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,6 +28,7 @@ class MedicationReminder {
       'hour': hour,
       'minute': minute,
       'isActive': isActive ? 1 : 0,
+      'createdTime': createdTime.toIso8601String(),
     };
   }
 
@@ -38,6 +41,9 @@ class MedicationReminder {
       hour: map['hour'],
       minute: map['minute'],
       isActive: map['isActive'] == 1,
+      createdTime: map['createdTime'] != null
+          ? DateTime.parse(map['createdTime'])
+          : DateTime.now(),
     );
   }
 }
