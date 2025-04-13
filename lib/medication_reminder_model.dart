@@ -19,6 +19,7 @@ class MedicationReminder {
     required this.createdTime,
   });
 
+  // Convert a MedicationReminder into a Map.
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -32,6 +33,7 @@ class MedicationReminder {
     };
   }
 
+  // Convert a Map into a MedicationReminder.
   factory MedicationReminder.fromMap(Map<String, dynamic> map) {
     return MedicationReminder(
       id: map['id'],
