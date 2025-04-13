@@ -37,6 +37,15 @@ dependencies:
   firebase_core: ^3.13.0
   firebase_auth: ^5.5.2
   cloud_firestore: ^5.6.6
+  sqflite: ^2.2.8+4
+  path_provider: ^2.0.14
+  awesome_notifications: ^0.10.1
+  timezone: ^0.9.0
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  intl: ^0.20.0
+  google_nav_bar: ^5.0.7
+ 
 
 dev_dependencies:
   flutter_test:
