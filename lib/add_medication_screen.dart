@@ -1,4 +1,6 @@
+// add_medication_screen.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'database_helper.dart';
 import 'medication_reminder_model.dart';
 import 'notification_service.dart';
@@ -23,7 +25,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   void initState() {
     super.initState();
     notificationService = NotificationService();
-    // Initialize notifications if needed.
     notificationService.initialize();
   }
 
@@ -41,33 +42,68 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   Future<void> _saveReminder() async {
     if (_formKey.currentState!.validate()) {
-      // Create a new medication reminder.
+      // Get current user's UID.
+      final String? uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No user logged in.')),
+        );
+        return;
+      }
+
+      // Create a new medication reminder with the userId.
       final newReminder = MedicationReminder(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: uid, // Associate reminder with the current user.
         name: _nameController.text.trim(),
         dosage: _dosageController.text.trim(),
         hour: _selectedTime.hour,
         minute: _selectedTime.minute,
-        isActive: true,
+        isActive: true, createdTime: DateTime.now(), // Set to current time.
+        // If your MedicationReminder model now includes a createdTime field,
+        // uncomment the following line. Otherwise, remove it.
+        // createdTime: DateTime.now(),
       );
 
-      // Insert into the database.
-      await dbHelper.insertMedication(newReminder);
+      print('Starting _saveReminder with reminder: ${newReminder.toMap()}');
 
-      // Schedule a notification.
-      await notificationService.scheduleNotification(
-        id: newReminder.id.hashCode,
-        title: 'Time for Medication',
-        body: 'Take ${newReminder.dosage} of ${newReminder.name}',
-        time: TimeOfDay(hour: newReminder.hour, minute: newReminder.minute),
-      );
+      // Insert the reminder into the database.
+      try {
+        await dbHelper.insertMedication(newReminder);
+        print('Database insert successful.');
+      } catch (dbError, dbStack) {
+        print('Error inserting medication: $dbError');
+        print('Database stack trace: $dbStack');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving to DB: $dbError')),
+        );
+        return; // Stop further execution if DB insertion fails.
+      }
 
-      // Show a confirmation message.
+      // Schedule a notification for the medication reminder.
+      try {
+        await notificationService.scheduleNotification(
+          id: newReminder.id.hashCode,
+          title: 'Time for Medication',
+          body: 'Take ${newReminder.dosage} of ${newReminder.name}',
+          time: TimeOfDay(hour: newReminder.hour, minute: newReminder.minute),
+        );
+        debugPrint('Notification scheduling successful.');
+      } catch (notifError, notifStack) {
+        print('Error scheduling notification: $notifError');
+        print('Notification stack trace: $notifStack');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error scheduling notification: $notifError')),
+        );
+        // Depending on your flow, you may choose to continue or return.
+        // return;
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Medication added successfully')),
       );
 
-      // Optionally, clear the form.
+      // Optionally clear the form fields.
       _nameController.clear();
       _dosageController.clear();
       setState(() {
@@ -86,8 +122,14 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Add New Medication'),
+        title: const Text(
+          'Add New Medication',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue.shade900,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -132,13 +174,13 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 ),
                 const SizedBox(height: 30),
                 Card(
-                  elevation: 4,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  color: Colors.white,
+                  elevation: 0,
                   child: ListTile(
                     contentPadding: const EdgeInsets.symmetric(
-                        vertical: 12.0, horizontal: 16.0),
+                      vertical: 12.0,
+                      horizontal: 16.0,
+                    ),
                     leading: const Icon(Icons.access_time, size: 28),
                     title: const Text('Select Time',
                         style: TextStyle(fontSize: 16)),
@@ -153,7 +195,8 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                 const SizedBox(height: 40),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.blue.shade900,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10.0),
                     ),
@@ -161,7 +204,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   onPressed: _saveReminder,
                   child: const Text(
                     'Save Reminder',
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
