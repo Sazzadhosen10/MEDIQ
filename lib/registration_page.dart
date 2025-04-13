@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'homepage.dart';
+import 'main_screen.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({Key? key}) : super(key: key);
@@ -12,8 +12,6 @@ class RegistrationPage extends StatefulWidget {
 
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
-
-  // Registration fields.
   String fullName = '';
   String email = '';
   String password = '';
@@ -21,6 +19,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   String phoneNumber = '';
   int age = 0;
   String gender = 'Male';
+  bool _isLoading = false;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -36,6 +35,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
         return;
       }
 
+      setState(() => _isLoading = true);
+
       try {
         UserCredential userCredential =
             await _auth.createUserWithEmailAndPassword(
@@ -43,7 +44,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
           password: password,
         );
 
-        // Save additional user information in Firestore.
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'fullName': fullName,
           'email': email,
@@ -52,54 +52,72 @@ class _RegistrationPageState extends State<RegistrationPage> {
           'gender': gender,
         });
 
-        // Navigate to Homepage upon successful registration.
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Registration successful")),
+        );
+
+        await Future.delayed(const Duration(seconds: 1));
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const Homepage()),
+          MaterialPageRoute(builder: (_) => MainScreen()),
         );
       } on FirebaseAuthException catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(e.message ?? 'Registration error')),
         );
-
-        print(e);
+      } finally {
+        setState(() => _isLoading = false);
       }
     }
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Registration'),
+        backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
+              const SizedBox(height: 16),
+              const Text(
+                'Sign Up',
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 30),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Full Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter your full name';
-                  return null;
-                },
+                decoration: _inputDecoration('Full Name'),
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter your full name'
+                    : null,
                 onSaved: (value) => fullName = value!.trim(),
               ),
+              const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Email'),
+                decoration: _inputDecoration('Email'),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter your email';
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter your email'
+                    : null,
                 onSaved: (value) => email = value!.trim(),
               ),
+              const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Password'),
+                decoration: _inputDecoration('Password'),
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -110,29 +128,27 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 },
                 onSaved: (value) => password = value!,
               ),
+              const SizedBox(height: 16),
               TextFormField(
-                decoration:
-                    const InputDecoration(labelText: 'Confirm Password'),
+                decoration: _inputDecoration('Confirm Password'),
                 obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please confirm your password';
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please confirm your password'
+                    : null,
                 onSaved: (value) => confirmPassword = value!,
               ),
+              const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Phone Number'),
+                decoration: _inputDecoration('Phone Number'),
                 keyboardType: TextInputType.phone,
-                validator: (value) {
-                  if (value == null || value.isEmpty)
-                    return 'Please enter your phone number';
-                  return null;
-                },
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Please enter your phone number'
+                    : null,
                 onSaved: (value) => phoneNumber = value!.trim(),
               ),
+              const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(labelText: 'Age'),
+                decoration: _inputDecoration('Age'),
                 keyboardType: TextInputType.number,
                 validator: (value) {
                   if (value == null || value.isEmpty)
@@ -143,26 +159,34 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 },
                 onSaved: (value) => age = int.parse(value!),
               ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Gender'),
+                decoration: _inputDecoration('Gender'),
                 value: gender,
                 items: const ['Male', 'Female', 'Other']
-                    .map((gender) => DropdownMenuItem(
-                          value: gender,
-                          child: Text(gender),
-                        ))
+                    .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                     .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    gender = value!;
-                  });
-                },
+                onChanged: (value) => setState(() => gender = value!),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _register,
-                child: const Text('Register'),
-              ),
+              const SizedBox(height: 30),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _register,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade900,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Register',
+                            style:
+                                TextStyle(fontSize: 16, color: Colors.white)),
+                      ),
+                    ),
             ],
           ),
         ),
