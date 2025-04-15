@@ -23,49 +23,72 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 20,
-              color: Colors.black.withOpacity(0.1),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
-          child: GNav(
-            gap: 8,
-            activeColor: Colors.blue.shade900, // Updated active color
-            color: Colors.grey,
-            iconSize: 24,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-            duration: const Duration(milliseconds: 400),
-            tabBackgroundColor: Colors.blue.shade100,
-            tabs: const [
-              GButton(
-                icon: Icons.home,
-                text: 'Home',
+    return WillPopScope(
+      onWillPop: () async {
+        bool shouldExit = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit?'),
+            content: const Text('Do you really want to exit the app?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
               ),
-              GButton(
-                icon: Icons.add_alert,
-                text: 'Add',
-              ),
-              GButton(
-                icon: Icons.person,
-                text: 'Profile',
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Yes'),
               ),
             ],
-            selectedIndex: _selectedIndex,
-            onTabChange: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+          ),
+        );
+        return shouldExit;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 20,
+                color: Colors.black.withOpacity(0.1),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8),
+            child: GNav(
+              gap: 8,
+              activeColor: Colors.blue.shade900,
+              color: Colors.grey,
+              iconSize: 24,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              duration: const Duration(milliseconds: 400),
+              tabBackgroundColor: Colors.blue.shade100,
+              tabs: const [
+                GButton(
+                  icon: Icons.home,
+                  text: 'Home',
+                ),
+                GButton(
+                  icon: Icons.add_alert,
+                  text: 'Add',
+                ),
+                GButton(
+                  icon: Icons.person,
+                  text: 'Profile',
+                ),
+              ],
+              selectedIndex: _selectedIndex,
+              onTabChange: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
           ),
         ),
       ),
