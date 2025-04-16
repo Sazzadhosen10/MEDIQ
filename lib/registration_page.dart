@@ -44,13 +44,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
           password: password,
         );
 
-        await _firestore.collection('users').doc(userCredential.user!.uid).set({
-          'fullName': fullName,
-          'email': email,
-          'phoneNumber': phoneNumber,
-          'age': age,
-          'gender': gender,
-        });
+      
+      
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Registration successful")),

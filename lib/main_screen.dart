@@ -16,6 +16,7 @@ class _MainScreenState extends State<MainScreen> {
 
   // List of pages for each tab.
   final List<Widget> _pages = [
+    
     Homepage(),
     AddMedicationScreen(),
     ProfileScreen(),
@@ -46,7 +47,8 @@ class _MainScreenState extends State<MainScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: _pages[_selectedIndex],
+     
+body: _pages[_selectedIndex],
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             color: Colors.white,

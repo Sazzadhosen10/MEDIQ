@@ -76,23 +76,23 @@ class _HomepageState extends State<Homepage> {
     }
   }
 
-  Future<void> _addMedication() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddMedicationScreen()),
-    );
+  // Future<void> _addMedication() async {
+  //   final result = await Navigator.push(
+  //     context,
+  //     MaterialPageRoute(builder: (context) => const AddMedicationScreen()),
+  //   );
 
-    if (result != null && user != null) {
-      await dbHelper.insertMedication(result);
-      await notificationService.scheduleNotification(
-        id: result.id.hashCode,
-        title: 'Time for Medication',
-        body: 'Take ${result.dosage} of ${result.name}',
-        time: TimeOfDay(hour: result.hour, minute: result.minute),
-      );
-      setState(() {});
-    }
-  }
+  //   if (result != null && user != null) {
+  //     await dbHelper.insertMedication(result);
+  //     await notificationService.scheduleNotification(
+  //       id: result.id.hashCode,
+  //       title: 'Time for Medication',
+  //       body: 'Take ${result.dosage} of ${result.name}',
+  //       time: TimeOfDay(hour: result.hour, minute: result.minute),
+  //     );
+  //     setState(() {});
+  //   }
+  // }
 
   Future<void> _deleteMedication(String id) async {
     await dbHelper.deleteMedication(id);
